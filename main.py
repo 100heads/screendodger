@@ -11,7 +11,7 @@ namelist = list(namedict)
 villagercount = "six"
 while villagercount == str(villagercount):
   #villagercount = input("What is the population?\nEnter a whole number: ")
-  villagercount = random.randint(1,3)
+  villagercount = random.randint(1,len(namelist))
   try:
     villagercount = int(villagercount)
     break
@@ -26,7 +26,7 @@ def people():
   name = list()
   # for i in namelist:
   for i in range(villagercount):
-    whichN = random.randint(0,2)
+    whichN = random.randint(0,len(namelist) - 1)
     whichname = namelist[whichN]
     name.append(whichname)
   whichVN = 0
@@ -87,7 +87,7 @@ BLUE = (60, 100, 230)
 YELLOW = (50, 150, 130)
 
 #Game set-up
-FPS = 60
+FPS = 1000
 fpsClock = pygame.time.Clock()
 WINDOW_WIDTH = 600 #600
 WINDOW_HEIGHT = 600 #600
@@ -110,8 +110,8 @@ yfast = 100000
 ynormal = 100000
 gravity = 0.25
 gravitymove = 0
-maxballs = 100
-howmanyballs = 7
+maxballs = 50000
+howmanyballs = 3900
 
 thetime = str(datetime.datetime.now())
 thedelimiters = (" ",":","-"," ")
@@ -135,6 +135,7 @@ class entity:
         self.height = list()
         self.x = list()
         self.y = list()
+        self.xy = list()
         self.stored_energy = list()
         self.using = 0
         self.leftenergy = list()
@@ -153,10 +154,11 @@ class entity:
         self.movecooldownUP = list()
         self.movecooldownDOWN = list()
       
-      self.width.append(60)
-      self.height.append(60)
-      self.x.append(random.randint(WINDOW_WIDTH//2.5, WINDOW_WIDTH//1.5))
-      self.y.append(random.randint(WINDOW_HEIGHT//2.5, WINDOW_HEIGHT//1.5))
+      self.width.append(1)
+      self.height.append(1)
+      self.x.append(random.randint(0, WINDOW_WIDTH)) #2.5, 1.5
+      self.y.append(random.randint(0, WINDOW_HEIGHT))
+      self.xy.append((self.x[i],self.y[i]))
       #energy in use must be 100,000 max, and 1 minimum; the higher the number, the less energy
       #and therefore speed (self.energy) (note: although we do not want a cap as to how slow
       #something can get, we also want something to be able of devoidability in energy)
@@ -171,13 +173,13 @@ class entity:
       # number, the slower, of course as well in seconds.
       self.stored_energy.append(10) # leftenergy[i] += using; self.stored_energy[i] += using 
       # using = -0.1
-      self.leftenergy.append(5000)
+      self.leftenergy.append(0)
       # we would wait for (to move left):  (100,000/self.leftenergy)/(100,000)
-      self.rightenergy.append(9670)
-      self.upenergy.append(4000)
-      self.downenergy.append(2700)
+      self.rightenergy.append(0)
+      self.upenergy.append(0)
+      self.downenergy.append(10000)
       
-      self.downgravity.append(3000) #3000
+      self.downgravity.append(4000) #3000
       self.thetime.append(thetime)
       self.oldtime[i] = list()
       for whichtime in range(howmanytimes):
@@ -190,6 +192,42 @@ loop = random.choice((True,False)); loop2 = random.randint(0,1)
 def main():
   global X, Y, width, height, loop, loop2, charactermoveY, charactermoveX, X_speed, Y_speed, movecooldownY, movecooldownX, xnormal, ynormal, gravity, gravitymove, thetime, oldtime
   # main game loop
+  #collidexposes = dict()
+  #collideyposes = dict()
+  collidexyposes = dict()
+  collidexyposes2 = dict()
+  collideposes = dict()
+  collidelist = list()
+  for i in range(howmanyballs):
+    collideposes[ent.xy[i]] = list()
+  for i in range(howmanyballs):
+    collideposes[ent.xy[i]].append(i)
+  
+  for i in range(howmanyballs):
+    collidelist.append(ent.xy[i])
+  #collideleftposes = dict()
+  #colliderightposes = dict()
+  #collidedownposes = dict()
+  #collideupposes = dict()
+  
+  #j = howmanyballs//2
+  #for i in range(howmanyballs//2): #real collision
+    #j -= 1
+    #collidexyposes[ent.xy[i]] = i
+    #collidexyposes2[ent.xy[i]] = i
+    
+  #  collideleftposes[ent.x[i] - 1] = i
+  #  colliderightposes[ent.x[i] + 1] = i
+  #  collidedownposes[ent.y[i] + 1] = i
+  #  collideupposes[ent.y[i] - 1] = i
+    #collidexposes[i].append(ent.x[p] + 1);collidexposes[i].append(ent.x[p] - 1)
+    #allxposes = list()
+    #for n in range(2):
+      #allxposes.append(collideposes[i][n])
+    #collideposes[i].append(ent.y[p] - 1);collideposes[i].append(ent.y[p] + 1)
+    #allyposes = list()
+    #for n in range(2):
+      #allyposes.append(collideposes[i][n + 2])
   for i in range(howmanyballs):
     #character = pygame.Rect(self.x[i], self.y[i], self.width[i], self.height[i])
     #get inputs
@@ -223,14 +261,6 @@ def main():
     #processing
     character = pygame.Rect(ent.x[i], ent.y[i], ent.width[i], ent.height[i])
     
-    #thetime = str(datetime.datetime.now())
-    #thedelimiters = (" ",":","-"," ")
-    #for o in range(len(thedelimiters)):
-      #delimiter = thedelimiters[o - 1]
-      #thetime = thetime.split(delimiter)
-      #thetime = "".join(thetime)
-    #thetime = float(thetime)
-    #ent.thetime[i] = thetime
     
     #if ent.thetime[i] >= ent.oldtime[i][0] + 2:
       #ent.oldtime[i][0] = ent.thetime[i]
@@ -240,6 +270,88 @@ def main():
       #print("--------------------\nIT HIT THE CORNER!!!\n--------------------")
     
     #check collision and set which way to move
+    conversion1 = -1; conversion2 = -1; conversion3 = -1; conversion4 = -1
+    collidelist[i] = -9
+    if ent.xy[i] in collidelist:
+      for c in range(len(collideposes[ent.xy[i]])):
+        if i != collideposes[ent.xy[i]][c]:
+          j = collideposes[ent.xy[i]][c]
+      collidelist[i] = ent.xy[i]#; collidelist[i + howmanyballs] = i
+      
+      if ent.rightenergy[i] > ent.leftenergy[i]:
+        xenergy = ent.rightenergy[i]
+        xenergy2 = ent.leftenergy[i]
+        conversion1 = "right"
+        #ent.x[i] -= 1
+      else:
+        xenergy = ent.leftenergy[i]
+        xenergy2 = ent.rightenergy[i]
+        conversion1 = "left"
+        #ent.x[i] += 1
+      if ent.upenergy[i] > (ent.downenergy[i] + ent.downgravity[i]):
+        yenergy = ent.upenergy[i]
+        yenergy2 = ent.downenergy[i]
+        conversion2 = "up"
+        #ent.y[i] += 1
+      else:
+        yenergy = ent.downenergy[i]
+        yenergy2 = ent.upenergy[i]
+        conversion2 = "down"
+        #ent.y[i] -= 1
+      
+      if ent.rightenergy[j] > ent.leftenergy[j]:
+        xenerjy = ent.rightenergy[j]
+        xenerjy2 = ent.leftenergy[j]
+        conversion3 = "right"
+      else:
+        xenerjy = ent.leftenergy[j]
+        xenerjy2 = ent.rightenergy[j]
+        conversion3 = "left"
+      if ent.upenergy[j] > (ent.downenergy[j] + ent.downgravity[j]):
+        yenerjy = ent.upenergy[j]
+        yenerjy2 = ent.downenergy[j]
+        conversion4 = "up"
+      else:
+        yenerjy = ent.downenergy[j]
+        yenerjy2 = ent.upenergy[j]
+        conversion4 = "down"
+      
+      xenergy -= xenerjy2
+      xenerjy -= xenergy2
+      xenergy2 += xenerjy
+      xenerjy2 += xenergy
+      
+      yenergy -= yenerjy2
+      yenerjy -= yenergy2
+      yenergy2 += yenerjy
+      yenerjy2 += yenergy
+    
+    if conversion1 == "right":
+      ent.rightenergy[i] = xenergy
+      ent.leftenergy[i] = xenergy2
+    if conversion1 == "left":
+      ent.leftenergy[i] = xenergy
+      ent.rightenergy[i] = xenergy2
+    if conversion2 == "up":
+      ent.upenergy[i] = yenergy
+      ent.downenergy[i] = yenergy2
+    if conversion2 == "down":
+      ent.downenergy[i] = yenergy
+      ent.upenergy[i] = yenergy2
+    
+    if conversion3 == "right":
+      ent.rightenergy[j] = xenerjy
+      ent.leftenergy[j] = xenerjy2
+    if conversion3 == "left":
+      ent.leftenergy[j] = xenerjy
+      ent.rightenergy[j] = xenerjy2
+    if conversion4 == "up":
+      ent.upenergy[j] = yenerjy
+      ent.downenergy[j] = yenerjy2
+    if conversion4 == "down":
+      ent.downenergy[j] = yenerjy
+      ent.upenergy[j] = yenerjy2
+    
     if ent.x[i] >= WINDOW_WIDTH - ent.width[i]:
       ent.x[i] = WINDOW_WIDTH - ent.width[i]
       exchange = random.choice((100,200,300))
@@ -262,7 +374,7 @@ def main():
         #ent.leftenergy[i] = xfast #random.choice((xnormal,xfast,xfast))
     
     if ent.y[i] >= WINDOW_HEIGHT - ent.height[i]:
-      ent.y[i] = WINDOW_HEIGHT - ent.height[i]
+      ent.y[i] = WINDOW_HEIGHT - ent.height[i] + 1
       exchange = random.choice((100,200,300))
       if ent.downenergy[i] >= exchange:
         ent.downenergy[i] -= exchange
@@ -280,28 +392,47 @@ def main():
     if ent.rightenergy[i] > 0:
       if ent.thetime[i] >= ent.oldtime[i][0] + (100000/ent.rightenergy[i]) / (10000):
         ent.oldtime[i][0] = ent.thetime[i]
+        #if i == collidexyposes[ent.xy[i]]:
+        #  del collidexyposes[ent.xy[i]]
+        #  oneORtwo = 1
+        #if i == collidexyposes2[ent.xy[i]]:
+        #  del collidexyposes2[ent.xy[i]]
+        #  oneORtwo = 2
+        
         ent.x[i] += 1
+        ent.xy[i] = (ent.x[i],ent.y[i])
+        
+        #if oneORtwo == 1:
+        #  collidexyposes[ent.xy[i]] = i
+        #if oneORtwo == 2:
+        #  collidexyposes2[ent.xy[i]] = i
     else:
       pass
     
     if ent.leftenergy[i] > 0:
       if ent.thetime[i] >= ent.oldtime[i][1] + (100000/ent.leftenergy[i]) / (10000):
         ent.oldtime[i][1] = ent.thetime[i]
+        
         ent.x[i] -= 1
+        ent.xy[i] = (ent.x[i],ent.y[i])
     else:
       pass
     
     if ent.upenergy[i] > 0:
       if ent.thetime[i] >= ent.oldtime[i][2] + (100000/ent.upenergy[i]) / (10000):
         ent.oldtime[i][2] = ent.thetime[i]
+        
         ent.y[i] -= 1
+        ent.xy[i] = (ent.x[i],ent.y[i])
     else:
       pass
     
     if ent.downenergy[i] > 0:
       if ent.thetime[i] >= ent.oldtime[i][3] + 100000/(ent.downenergy[i] + ent.downgravity[i]) / 10000:
         ent.oldtime[i][3] = ent.thetime[i]
+        
         ent.y[i] += 1
+        ent.xy[i] = (ent.x[i],ent.y[i])
     else:
       pass
     
